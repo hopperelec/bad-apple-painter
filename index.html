@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bad Apple!! paint game</title>
+    <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+
+<div id="game-container">
+    <div id="video-container">
+        <video id="game-video" oncontextmenu="return false;" disablepictureinpicture></video>
+        <dl id="game-stats">
+            <dt>Time</dt>
+            <dd>
+                <span id="current-time">0:00</span> /
+                <span id="total-time">-:--</span>
+            </dd>
+            <dt>Points</dt>
+            <dd id="points-value">0</dd>
+            <dt>Accuracy</dt>
+            <dd id="accuracy-value">0%</dd>
+        </dl>
+    </div>
+    <div id="separator"
+         role="separator"
+         tabindex="0"
+         aria-valuenow="0.5"
+         aria-valuemin="0"
+         aria-valuemax="1"
+         aria-label="Resize canvas and video"
+    ></div>
+    <div id="canvas-container">
+        <canvas id="game-canvas" width="8" height="6"></canvas>
+        <div id="game-controls">
+            <button id="restart-button" title="Restart" class="small-game-control">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                </svg>
+            </button>
+            <button id="pause-resume-button" title="Pause" class="small-game-control">
+                <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+                <svg class="resume-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </button>
+            <!-- TODO: These should have icons -->
+            <button id="swap-colors-button">Swap colors</button>
+            <button id="fill-tool-button">Fill</button>
+            <button id="invert-tool-button">Invert</button>
+        </div>
+    </div>
+</div>
+
+<div id="start-screen-container">
+    <dialog open>
+        <h1>Bad&nbsp;Apple!! paint&nbsp;game</h1>
+
+        <div id="video-and-canvas">
+            <h2>Video</h2>
+            <p>This is what you will see</p>
+            <div id="video-selection">
+                <label id="video-select-button">
+                    Click to select the video file
+                    <input type="file" id="video-file-input" accept="video/*" aria-label="Video file" />
+                </label>
+                <label>
+                    Volume
+                    <input type="range" id="volume-input" min="0" max="1" step="0.01" value="0.5" />
+                </label>
+            </div>
+            <div class="preview-container">
+                <div class="preview">
+                    <video id="video-preview" oncontextmenu="return false;" disablepictureinpicture></video>
+                    <button id="preview-play-pause" title="Play">
+                        <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        </svg>
+                    </button>
+                    <input type="range" id="preview-seek-bar" min="0" value="0" step="0.01" aria-label="Seek video" />
+                    <div class="video-not-selected-overlay">
+                        <p>No video selected</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Canvas</h2>
+            <p>This is what you will have to draw,<br>scaled from the video</p>
+            <div class="options">
+                <fieldset id="canvas-size-fieldset">
+                    <legend>Dimensions</legend>
+                    <div>
+                        <input type="number" id="canvas-width" value="8" min="1" title="Canvas width" />
+                        &times;
+                        <input type="number" id="canvas-height" value="6" min="1" title="Canvas height" />
+                    </div>
+                </fieldset>
+                <fieldset id="scaling-method-fieldset">
+                    <legend>Scaling method</legend>
+                    <div>
+                        <label>
+                            <input type="radio" name="scaling-method" value="nearest" checked />
+                            Nearest neighbor
+                        </label>
+                        <label>
+                            <input type="radio" name="scaling-method" value="bilinear" />
+                            Bilinear
+                        </label>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="preview-container">
+                <div class="preview">
+                    <canvas id="canvas-preview" width="8" height="6"></canvas>
+                    <div class="video-not-selected-overlay">
+                        <p>No video selected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="options-container">
+            <h2>Paint features</h2>
+            <div class="options">
+                <label>
+                    Enable Fill
+                    <input type="checkbox" id="enable-fill" checked />
+                </label>
+                <label>
+                    Enable Invert
+                    <input type="checkbox" id="enable-invert" checked />
+                </label>
+                <fieldset id="brush-shape-fieldset">
+                    <legend>Brush Shape</legend>
+                    <div>
+                        <label>
+                            <input type="radio" name="brush-shape" value="square" checked />
+                            Square
+                        </label>
+                        <label>
+                            <input type="radio" name="brush-shape" value="circle" />
+                            Circle
+                        </label>
+                    </div>
+                </fieldset>
+                <label>
+                    Min Brush Size
+                    <input type="number" id="min-brush-size" value="1" min="1" />
+                </label>
+                <label>
+                    Max Brush Size
+                    <input type="number" id="max-brush-size" value="1" min="1" />
+                </label>
+            </div>
+
+            <h2>Controls</h2>
+            <div class="options">
+                <label>
+                    Fill
+                    <button id="controls-fill-tool" class="keybind-button" aria-label="Change keybind for fill tool">
+                        <kbd>f</kbd>
+                    </button>
+                </label>
+
+                <label>
+                    Invert
+                    <button id="controls-invert-tool" aria-label="Change keybind for invert tool">
+                        <kbd>i</kbd>
+                    </button>
+                </label>
+
+                <label>
+                    Pause / Resume
+                    <button id="controls-play-pause" class="keybind-button" aria-label="Change keybind for pause/resume">
+                        <kbd>Space</kbd>
+                    </button>
+                </label>
+
+                <label>
+                    Swap Colors
+                    <button id="controls-swap-colors" class="keybind-button" aria-label="Change keybind for swapping colors">
+                        <kbd>c</kbd>
+                    </button>
+                </label>
+
+                <p>You can increase/decrease the brush size using the mouse wheel. Alternatively:</p>
+                <label>
+                    Increase Brush Size
+                    <button id="controls-increase-brush-size" class="keybind-button" aria-label="Change keybind for increasing brush size">
+                        <kbd>]</kbd>
+                    </button>
+                </label>
+                <label>
+                    Decrease Brush Size
+                    <button id="controls-decrease-brush-size" class="keybind-button" aria-label="Change keybind for decreasing brush size">
+                        <kbd>[</kbd>
+                    </button>
+                </label>
+                <fieldset>
+                    <legend>Brush Size Presets</legend>
+                    <div>
+                        <ul id="brush-size-presets"><!--
+                            Presets will be dynamically added here. Example:
+                            <li>
+                                <input type="number" class="brush-size-preset-value" min="1" value="5" />
+                                <button class="brush-size-preset-keybind keybind-button">
+                                    <kbd>5</kbd>
+                                </button>
+                                <button class="brush-size-preset-delete" aria-label="Delete preset">&times;</button>
+                            </li>
+                        --></ul>
+                        <button type="button" id="controls-add-brush-size-preset">
+                            + Add New Preset
+                        </button>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <div id="start-game-button-container">
+            <button id="start-game-button" disabled>Start Game</button>
+        </div>
+    </dialog>
+</div>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

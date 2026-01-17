@@ -1,0 +1,367 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+}
+
+canvas {
+    image-rendering: pixelated;
+}
+
+#start-screen-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    backdrop-filter: blur(5px);
+    background-color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+h1, h2 {
+    margin: 0;
+}
+
+/* Act as <hr>, but flexible to grid layouts */
+#start-screen-container h2, #start-game-button-container {
+    border-top: 1px solid #ccc;
+    padding-top: .5em;
+    margin-top: .5em;
+}
+
+dialog {
+    overflow-y: auto;
+    max-width: calc(100vw - 2em); /* 1em padding */
+    max-height: calc(100vh - 2em); /* Subtract margin */
+    margin: 1em auto;
+    box-sizing: border-box;
+}
+
+button {
+    cursor: pointer;
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+
+/* --- Video and canvas --- */
+
+#video-and-canvas {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(4, auto); /* header, description, options, preview */
+    grid-template-columns: repeat(2, minmax(0, 400px)); /* video, canvas */
+    gap: 0 1em;
+
+    p {
+        text-align: center;
+        margin: 0;
+    }
+
+    @media (max-width: 600px) {
+        grid-auto-flow: row;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+}
+
+.preview-container {
+    display: flex;
+    justify-content: center;
+}
+
+.preview {
+    position: relative;
+    background-color: black;
+    aspect-ratio: 4/3;
+    min-height: 0;
+    max-width: 400px;
+    flex: 1 1 auto;
+
+    video, canvas {
+        display: block;
+        object-fit: contain;
+        width: 100%;
+    }
+}
+
+/* --- Video Selection --- */
+
+#video-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#video-file-input {
+    /* Hide, but still accessible for screen readers */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+#video-select-button {
+    padding: .5em;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+
+    &:hover {
+        background-color: #0056b3;
+    }
+}
+
+#preview-play-pause {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    padding: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#preview-play-pause svg {
+    width: 2em;
+    height: 2em;
+    fill: white;
+}
+
+#preview-play-pause {
+    &[title="Play"] .pause-icon,
+    &[title="Pause"] .play-icon {
+        display: none;
+    }
+}
+
+#preview-seek-bar {
+    position: absolute;
+    left: 0.5em;
+    right: 0.5em;
+    bottom: 0;
+    margin: .5em;
+    box-sizing: border-box;
+    width: auto;
+}
+
+.video-not-selected-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 1.5em;
+    user-select: none;
+}
+
+/* --- Options --- */
+
+.options {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    text-align: left;
+    height: fit-content;
+
+    > p {
+        grid-column: 1 / -1;
+        text-align: center;
+    }
+
+    > fieldset,
+    > label {
+        display: contents;
+
+        > legend {
+            padding: 0;
+        }
+
+        > :not(legend) {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-self: right;
+            justify-content: right;
+            padding-left: 1ch;
+        }
+
+        > button {
+            width: fit-content;
+        }
+    }
+
+    input[type="number"] {
+        width: 5ch;
+    }
+}
+
+label:has(input[type="radio"]) {
+    white-space: nowrap;
+}
+
+#options-container {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, auto); /* header, options */
+    grid-template-columns: repeat(2, minmax(0, 400px)); /* paint features, controls */
+    gap: 0 1em;
+
+    @media (max-width: 650px) {
+        grid-auto-flow: row;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+}
+
+.keybind-button:not(:disabled):not(:has(kbd)) {
+    /* Default styling for when no keybind is set */
+    color: #b70;
+    font-style: italic;
+}
+
+#brush-size-presets {
+    margin: 0;
+    list-style: none;
+}
+
+.brush-size-preset-delete {
+    background: red;
+    color: white;
+    border: 1px solid darkred;
+}
+
+/* --- Game --- */
+
+#game-container {
+    --separator-position: .5;
+    --separator-percent: calc(var(--separator-position) * 100%);
+    --separator-size: 6px;
+
+    background: #000;
+    color: #ddd;
+    height: 100%;
+    display: grid;
+    grid-template-columns:
+        calc(var(--separator-position) * (100% - var(--separator-size)))
+        var(--separator-size)
+        calc((1 - var(--separator-position)) * (100% - var(--separator-size)));
+}
+
+#video-container,
+#canvas-container {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+}
+
+#game-video,
+#game-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#game-stats,
+#game-controls {
+    height: 4em;
+    margin: 0;
+    background: #111;
+    border-top: 2px solid #222;
+}
+
+#game-stats {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-template-rows: auto auto; /* dt dd */
+    grid-auto-flow: column;
+    text-align: center;
+
+    dt {
+        align-self: end;
+        font-weight: bold;
+    }
+
+    dd {
+        align-self: start;
+        margin: 0;
+    }
+}
+
+#game-controls {
+    display: flex;
+
+    button {
+        flex: 1;
+        font-size: 1.5em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: inherit;
+
+        svg {
+            height: 1.5em;
+            fill: #fff;
+        }
+
+        &.small-game-control {
+            flex: none;
+            aspect-ratio: 1 / 1;
+        }
+
+        &:hover {
+            background: #222;
+        }
+
+        &:not(:first-child) {
+            border-left: 2px solid #222;
+        }
+    }
+}
+
+#pause-resume-button {
+    &[title="Pause"] .resume-icon,
+    &[title="Resume"] .pause-icon {
+        display: none;
+    }
+}
+
+#separator {
+    width: var(--separator-size);
+    background: #2a2a2a;
+    cursor: col-resize;
+}
+
+@media (max-aspect-ratio: 1 / 1) {
+    #game-container {
+        grid-template-columns: 1fr;
+        grid-template-rows:
+            calc(var(--separator-position) * (100% - var(--separator-size)))
+            var(--separator-size)
+            calc((1 - var(--separator-position)) * (100% - var(--separator-size)));
+    }
+
+    #separator {
+        width: 100%;
+        height: var(--separator-size);
+        cursor: row-resize;
+    }
+}
