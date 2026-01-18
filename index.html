@@ -34,7 +34,7 @@
     <div id="canvas-container">
         <canvas id="game-canvas" width="8" height="6"></canvas>
         <div id="game-controls">
-            <button id="restart-button" title="Restart" class="small-game-control">
+            <button id="game-restart-button" title="Restart" class="small-game-control">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
                 </svg>
@@ -226,6 +226,15 @@
         <div id="start-game-button-container">
             <button id="start-game-button" disabled>Start Game</button>
         </div>
+    </dialog>
+</div>
+
+<div id="end-screen-container">
+    <dialog open>
+        <h1>Game Over</h1>
+        <p>Your final score:</p>
+        <p id="final-points-value">0</p>
+        <button id="end-restart-button">Play Again</button>
     </dialog>
 </div>
 

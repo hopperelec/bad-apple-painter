@@ -420,7 +420,7 @@ const gameTotalTimeElement = document.getElementById('total-time') as HTMLElemen
 const gamePointsElement = document.getElementById('points-value') as HTMLElement;
 const accuracyElement = document.getElementById('accuracy-value') as HTMLElement;
 
-const restartButton = document.getElementById('restart-button') as HTMLButtonElement;
+const gameRestartButton = document.getElementById('game-restart-button') as HTMLButtonElement;
 const gamePauseResumeButton = document.getElementById('pause-resume-button') as HTMLButtonElement;
 const swapColorsButton = document.getElementById('swap-colors-button') as HTMLButtonElement;
 const fillToolButton = document.getElementById('fill-tool-button') as HTMLButtonElement;
@@ -476,7 +476,7 @@ gameVideo.addEventListener('timeupdate', () => {
     gameCurrentTimeElement.textContent = secondsToTimeString(gameVideo.currentTime);
 });
 
-restartButton.addEventListener('click', () => {
+gameRestartButton.addEventListener('click', () => {
     gameVideo.pause();
     startScreenContainer.style.display = '';
 });
@@ -721,4 +721,20 @@ window.addEventListener('mousemove', (event) => {
 
     gameSeparator.setAttribute('aria-valuenow', percent.toString());
     gameContainer.style.setProperty('--separator-position', percent.toString());
+});
+
+// -- End screen ---
+
+const endScreenContainer = document.getElementById('end-screen-container') as HTMLElement;
+const finalPointsElement = document.getElementById('final-points-value') as HTMLElement;
+const endRestartButton = document.getElementById('end-restart-button') as HTMLButtonElement;
+
+gameVideo.addEventListener('ended', () => {
+    finalPointsElement.textContent = points.toFixed(0);
+    endScreenContainer.style.display = 'block';
+});
+
+endRestartButton.addEventListener('click', () => {
+    endScreenContainer.style.display = '';
+    startScreenContainer.style.display = '';
 });

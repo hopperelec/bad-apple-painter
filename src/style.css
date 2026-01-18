@@ -8,7 +8,7 @@ canvas {
     image-rendering: pixelated;
 }
 
-#start-screen-container {
+#start-screen-container, #end-screen-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -18,6 +18,10 @@ canvas {
     backdrop-filter: blur(5px);
     background-color: rgba(0, 0, 0, 0.5);
     text-align: center;
+}
+
+#end-screen-container {
+    display: none;
 }
 
 h1, h2 {
